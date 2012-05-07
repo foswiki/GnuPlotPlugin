@@ -14,11 +14,9 @@ if ($debug) {
 
 if ( $#ARGV != 4 ) {
     open( DEBUGFILE, ">>/tmp/gluplot.pl.log" );
-    print DEBUGFILE
-"Usage: gluplot.pl ploticus_executable working_dir infile outfile errfile\n";
+    print DEBUGFILE "Usage: gluplot.pl ploticus_executable working_dir infile outfile errfile\n";
     close DEBUGFILE;
-    die
-"Usage: gluplot.pl ploticus_executable working_dir infile outfile errfile\n";
+    die "Usage: gluplot.pl ploticus_executable working_dir infile outfile errfile\n";
 }
 
 my $ploticusBin = $ARGV[0];
@@ -47,8 +45,7 @@ if ($debug) {
 print `$execCmd`;
 if ($!) {
     open( ERRFILE, ">>$ARGV[4]" );
-    print ERRFILE
-      "Problem with executing ploticus command: '$execCmd', got:\n$!";
-    close ERRFILE;
+    print ERRFILE "Problem with executing ploticus command: '$execCmd', got:\n$!";
+    close ERRFILE; 
     die "Problem with executing ploticus command: '$execCmd', got:\n$!";
 }

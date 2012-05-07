@@ -72,8 +72,11 @@ $VERSION = '$Rev: 1.0$';
 # of the version number in PLUGINDESCRIPTIONS.
 $RELEASE = 'Dakar';
 
+
+
 # Name of this Plugin, only used in this module
 $pluginName = 'GnuPlotPlugin';
+
 
 =pod
 
@@ -102,105 +105,82 @@ and highly dangerous!
 
 =cut
 
+
 sub initPlugin {
-
-#TWiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
-    my ( $topic, $web, $user, $installWeb ) = @_;
-    $debug = TWiki::Func::getPreferencesValue('GNUPLOTPLUGIN_DEBUG');
-    TWiki::Func::writeDebug("Initialising GnuPlotPlugin....") if $debug;
-
+    #TWiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
+    my( $topic, $web, $user, $installWeb ) = @_;
+    $debug = TWiki::Func::getPreferencesValue( 'GNUPLOTPLUGIN_DEBUG' );
+    TWiki::Func::writeDebug( "Initialising GnuPlotPlugin...." ) if $debug;
     # check for Plugins.pm versions
-    if ( $TWiki::Plugins::VERSION < 1.026 ) {
-        TWiki::Func::writeWarning(
-            "Version mismatch between $pluginName and Plugins.pm");
+    if( $TWiki::Plugins::VERSION < 1.026 ) {
+        TWiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
         return 0;
     }
 
     # register the handleGnuPlotTag function to handle %GNUPLOT{...}% tag
     TWiki::Func::registerTagHandler( 'GNUPLOT', \&handleGnuPlotTag );
 
-    # Allow a sub to be called from the REST interface
+    # Allow a sub to be called from the REST interface 
     # using the provided alias
-    TWiki::Func::registerRESTHandler( 'gnuPlot', \&restGnuPlot );
+    TWiki::Func::registerRESTHandler('gnuPlot', \&restGnuPlot);
 
     # Plugin correctly initialized
     return 1;
 }
 
-sub handleGnuPlotTag {
-    my ( $session, $params, $topic, $web ) = @_;
 
+sub handleGnuPlotTag {
+    my($session, $params, $topic, $web) = @_;
     # $session  - not used.
     # $params=  - _DEFAULT is the name of the plot
     # $theTopic - name of the topic in the query
     # $theWeb   - name of the web in the query
     # Return: rendered text for the plugin
 
-    TWiki::Func::writeDebug(
-"GnuPlotPlugin::handleGnuPlotTag for $web - $topic Name=$params->{_DEFAULT}"
-    ) if $debug;
+    TWiki::Func::writeDebug( "GnuPlotPlugin::handleGnuPlotTag for $web - $topic Name=$params->{_DEFAULT}" ) if $debug;
     my $plotName = $params->{_DEFAULT};
-    unless ($plotName) { return showError('Plot must have a name.'); }
-    my $query  = TWiki::Func::getCgiQuery();
-    my $action = $query->param('gnuPlotAction');
-    unless ($action) { return showPlot( $web, $topic, $plotName ); }
-    my $queryTarget = $query->param('gnuPlotName');
-
-    if ( $action eq 'edit' and $queryTarget eq $plotName ) {
-        return editPlotSettings( $web, $topic, $plotName );
-    }
-    if ( $action eq 'save' and $queryTarget eq $plotName ) {
-        return savePlotSettings( $web, $topic, $plotName,
-            $query->param('gnuPlotSettingsText') );
-    }
-    return showPlot( $web, $topic, $plotName );
+    unless ($plotName) { return showError('Plot must have a name.'); };
+    my $query = TWiki::Func::getCgiQuery();
+    my $action = $query->param( 'gnuPlotAction');
+    unless ($action) { return showPlot($web, $topic, $plotName); };
+    my $queryTarget = $query->param( 'gnuPlotName');
+    if ($action eq 'edit' and $queryTarget eq $plotName) { return editPlotSettings($web, $topic, $plotName); };
+    if ($action eq 'save' and $queryTarget eq $plotName) { return savePlotSettings($web, $topic, $plotName, $query->param( 'gnuPlotSettingsText')); };
+    return showPlot($web, $topic, $plotName); 
 }
 
-sub showError {
+sub showError{
     my $error = shift;
-    TWiki::Func::writeDebug("GnuPlotPlugin showError") if $debug;
+    TWiki::Func::writeDebug( "GnuPlotPlugin showError" ) if $debug;
     return "Error: $error\n";
 }
 
-sub showPlot {
-    my ( $web, $topic, $name ) = @_;
-    TWiki::Func::writeDebug(
-        "GnuPlotPlugin::showPlot  - showPlot for $web, $topic, $name")
-      if $debug;
+sub showPlot{
+    my ($web, $topic, $name) = @_;
+    TWiki::Func::writeDebug( "GnuPlotPlugin::showPlot  - showPlot for $web, $topic, $name" ) if $debug;
     require TWiki::Plugins::GnuPlotPlugin::Plot;
-    my $plot = TWiki::Plugins::GnuPlotPlugin::Plot->new( $web, $topic, $name );
+    my $plot = TWiki::Plugins::GnuPlotPlugin::Plot->new($web, $topic, $name);
     return $plot->render();
 }
 
-sub editPlotSettings {
-    my ( $web, $topic, $name ) = @_;
-    TWiki::Func::writeDebug(
-        "GnuPlotPlugin::editPlotSettings for $web, $topic, $name")
-      if $debug;
+sub editPlotSettings{
+    my ($web, $topic, $name) = @_;
+    TWiki::Func::writeDebug( "GnuPlotPlugin::editPlotSettings for $web, $topic, $name" ) if $debug;
     require TWiki::Plugins::GnuPlotPlugin::PlotSettings;
-    my $settings =
-      TWiki::Plugins::GnuPlotPlugin::PlotSettings->fromFile( $web, $topic,
-        $name );
+    my $settings = TWiki::Plugins::GnuPlotPlugin::PlotSettings->fromFile($web, $topic, $name);
     return $settings->render();
 }
 
-sub savePlotSettings {
-    my ( $web, $topic, $name, $text ) = @_;
-    TWiki::Func::writeDebug(
-        "GnuPlotPlugin::savePlotSettings $web, $topic, $name, $text")
-      if $debug;
+sub savePlotSettings{
+    my ($web, $topic, $name, $text) = @_;
+    TWiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings $web, $topic, $name, $text" ) if $debug;
     require TWiki::Plugins::GnuPlotPlugin::PlotSettings;
-    TWiki::Func::writeDebug(
-"GnuPlotPlugin::savePlotSettings ----------------------------------------------------"
-    ) if $debug;
-    TWiki::Plugins::GnuPlotPlugin::PlotSettings::writeFile( $web, $topic, $name,
-        $text );
-    TWiki::Func::writeDebug(
-"GnuPlotPlugin::savePlotSettings OOOOO----------------------------------------------------"
-    ) if $debug;
-    TWiki::Func::redirectCgiQuery( {},
-        TWiki::Func::getScriptUrl( $web, $topic, "view" ) . "\#gnuplot$name" );
+    TWiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings ----------------------------------------------------" ) if $debug;
+    TWiki::Plugins::GnuPlotPlugin::PlotSettings::writeFile($web, $topic, $name, $text);
+    TWiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings OOOOO----------------------------------------------------" ) if $debug;
+    TWiki::Func::redirectCgiQuery( {}, TWiki::Func::getScriptUrl( $web, $topic, "view" ) . "\#gnuplot$name");
 }
+
 
 =pod
 
@@ -234,13 +214,10 @@ __Since:__ TWiki::Plugins::VERSION = '1.010'
 =cut
 
 sub DISABLE_initializeUserHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $loginName, $url, $pathInfo ) = @_;
 
-    TWiki::Func::writeDebug(
-        "- ${pluginName}::initializeUserHandler( $_[0], $_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::initializeUserHandler( $_[0], $_[1] )" ) if $debug;
 }
 
 =pod
@@ -257,13 +234,10 @@ __Since:__ TWiki::Plugins::VERSION = '1.010'
 =cut
 
 sub DISABLE_registrationHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $web, $wikiName, $loginName ) = @_;
 
-    TWiki::Func::writeDebug(
-        "- ${pluginName}::registrationHandler( $_[0], $_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::registrationHandler( $_[0], $_[1] )" ) if $debug;
 }
 
 =pod
@@ -295,12 +269,10 @@ handler.
 =cut
 
 sub DISABLE_commonTagsHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug("- ${pluginName}::commonTagsHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::commonTagsHandler( $_[2].$_[1] )" ) if $debug;
 
     # do custom extension rule, like for example:
     # $_[0] =~ s/%XYZ%/&handleXyz()/ge;
@@ -328,13 +300,10 @@ handler.
 =cut
 
 sub DISABLE_beforeCommonTagsHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug(
-        "- ${pluginName}::beforeCommonTagsHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::beforeCommonTagsHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -357,13 +326,10 @@ handler.
 =cut
 
 sub DISABLE_afterCommonTagsHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug(
-        "- ${pluginName}::afterCommonTagsHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::afterCommonTagsHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -407,7 +373,6 @@ Since TWiki::Plugins::VERSION = '1.026'
 =cut
 
 sub DISABLE_preRenderingHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     #my( $text, $pMap ) = @_;
 }
@@ -427,7 +392,6 @@ Since TWiki::Plugins::VERSION = '1.026'
 =cut
 
 sub DISABLE_postRenderingHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     #my $text = shift;
 }
@@ -448,12 +412,10 @@ __Since:__ TWiki::Plugins::VERSION = '1.010'
 =cut
 
 sub DISABLE_beforeEditHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug("- ${pluginName}::beforeEditHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::beforeEditHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -475,12 +437,10 @@ __Since:__ TWiki::Plugins::VERSION = '1.010'
 =cut
 
 sub DISABLE_afterEditHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug("- ${pluginName}::afterEditHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::afterEditHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -500,12 +460,10 @@ __Since:__ TWiki::Plugins::VERSION = '1.010'
 =cut
 
 sub DISABLE_beforeSaveHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug("- ${pluginName}::beforeSaveHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::beforeSaveHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -527,12 +485,10 @@ __Since:__ TWiki::Plugins::VERSION = '1.020'
 =cut
 
 sub DISABLE_afterSaveHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web, $error, $meta ) = @_;
 
-    TWiki::Func::writeDebug("- ${pluginName}::afterSaveHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::afterSaveHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -554,12 +510,9 @@ __Since:__ TWiki::Plugins::VERSION = '1.023'
 =cut
 
 sub DISABLE_beforeAttachmentSaveHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ###   my( $attrHashRef, $topic, $web ) = @_;
-    TWiki::Func::writeDebug(
-        "- ${pluginName}::beforeAttachmentSaveHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::beforeAttachmentSaveHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -580,12 +533,9 @@ __Since:__ TWiki::Plugins::VERSION = '1.023'
 =cut
 
 sub DISABLE_afterAttachmentSaveHandler {
-
     # do not uncomment, use $_[0], $_[1]... instead
     ###   my( $attrHashRef, $topic, $web ) = @_;
-    TWiki::Func::writeDebug(
-        "- ${pluginName}::afterAttachmentSaveHandler( $_[2].$_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::afterAttachmentSaveHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -641,7 +591,7 @@ __Since:__ TWiki::Plugins::VERSION 1.026
 sub DISABLE_modifyHeaderHandler {
     my ( $headers, $query ) = @_;
 
-    TWiki::Func::writeDebug("- ${pluginName}::modifyHeaderHandler()") if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::modifyHeaderHandler()" ) if $debug;
 }
 
 =pod
@@ -661,13 +611,10 @@ __Since:__ TWiki::Plugins::VERSION = '1.010'
 =cut
 
 sub DISABLE_redirectCgiQueryHandler {
-
     # do not uncomment, use $_[0], $_[1] instead
     ### my ( $query, $url ) = @_;
 
-    TWiki::Func::writeDebug(
-        "- ${pluginName}::redirectCgiQueryHandler( query, $_[1] )")
-      if $debug;
+    TWiki::Func::writeDebug( "- ${pluginName}::redirectCgiQueryHandler( query, $_[1] )" ) if $debug;
 }
 
 =pod
@@ -688,6 +635,7 @@ Return HTML text that renders this field. If false, form rendering continues by 
 sub DISABLE_renderFormFieldForEditHandler {
 }
 
+
 =pod
 
 
@@ -703,9 +651,8 @@ For more information, check %SYSTEMWEB%.CommandAndCGIScripts#rest
 =cut
 
 sub restGnuPlot {
-
-    #my ($session) = @_;
-    return "This is an example of a REST invocation\n\n";
+   #my ($session) = @_;
+   return "This is an example of a REST invocation\n\n";
 }
 
 1;
