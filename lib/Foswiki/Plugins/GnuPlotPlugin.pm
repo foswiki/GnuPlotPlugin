@@ -27,7 +27,7 @@ disabled by default in a TWiki installation. Use it as a template
 for your own plugins; see %SYSTEMWEB%.Plugins for details.
 
 __NOTE:__ To interact with TWiki use ONLY the official API functions
-in the TWiki::Func module. Do not reference any functions or
+in the Foswiki::Func module. Do not reference any functions or
 variables elsewhere in TWiki, as these are subject to change
 without prior warning, and your plugin may suddenly stop
 working.
@@ -53,7 +53,7 @@ compatibility with older TWiki versions.
 =cut
 
 # change the package name and $pluginName!!!
-package TWiki::Plugins::GnuPlotPlugin;
+package Foswiki::Plugins::GnuPlotPlugin;
 
 # Always use strict to enforce variable scoping
 use strict;
@@ -90,14 +90,14 @@ REQUIRED
 
 Called to initialise the plugin. If everything is OK, should return
 a non-zero value. On non-fatal failure, should write a message
-using TWiki::Func::writeWarning and return 0. In this case
+using Foswiki::Func::writeWarning and return 0. In this case
 %FAILEDPLUGINS% will indicate which plugins failed.
 
 In the case of a catastrophic failure that will prevent the whole
 installation from working safely, this handler may use 'die', which
 will be trapped and reported in the browser.
 
-You may also call =TWiki::Func::registerTagHandler= here to register
+You may also call =Foswiki::Func::registerTagHandler= here to register
 a function to handle tags that have standard TWiki syntax - for example,
 =%MYTAG{"my param" myarg="My Arg"}%. You can also override internal
 TWiki tag handling functions this way, though this practice is unsupported
@@ -107,22 +107,22 @@ and highly dangerous!
 
 
 sub initPlugin {
-    #TWiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
+    #Foswiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
     my( $topic, $web, $user, $installWeb ) = @_;
-    $debug = TWiki::Func::getPreferencesValue( 'GNUPLOTPLUGIN_DEBUG' );
-    TWiki::Func::writeDebug( "Initialising GnuPlotPlugin...." ) if $debug;
+    $debug = Foswiki::Func::getPreferencesValue( 'GNUPLOTPLUGIN_DEBUG' );
+    Foswiki::Func::writeDebug( "Initialising GnuPlotPlugin...." ) if $debug;
     # check for Plugins.pm versions
-    if( $TWiki::Plugins::VERSION < 1.026 ) {
-        TWiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
+    if( $Foswiki::Plugins::VERSION < 1.026 ) {
+        Foswiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
         return 0;
     }
 
     # register the handleGnuPlotTag function to handle %GNUPLOT{...}% tag
-    TWiki::Func::registerTagHandler( 'GNUPLOT', \&handleGnuPlotTag );
+    Foswiki::Func::registerTagHandler( 'GNUPLOT', \&handleGnuPlotTag );
 
     # Allow a sub to be called from the REST interface 
     # using the provided alias
-    TWiki::Func::registerRESTHandler('gnuPlot', \&restGnuPlot);
+    Foswiki::Func::registerRESTHandler('gnuPlot', \&restGnuPlot);
 
     # Plugin correctly initialized
     return 1;
@@ -137,10 +137,10 @@ sub handleGnuPlotTag {
     # $theWeb   - name of the web in the query
     # Return: rendered text for the plugin
 
-    TWiki::Func::writeDebug( "GnuPlotPlugin::handleGnuPlotTag for $web - $topic Name=$params->{_DEFAULT}" ) if $debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::handleGnuPlotTag for $web - $topic Name=$params->{_DEFAULT}" ) if $debug;
     my $plotName = $params->{_DEFAULT};
     unless ($plotName) { return showError('Plot must have a name.'); };
-    my $query = TWiki::Func::getCgiQuery();
+    my $query = Foswiki::Func::getCgiQuery();
     my $action = $query->param( 'gnuPlotAction');
     unless ($action) { return showPlot($web, $topic, $plotName); };
     my $queryTarget = $query->param( 'gnuPlotName');
@@ -151,34 +151,34 @@ sub handleGnuPlotTag {
 
 sub showError{
     my $error = shift;
-    TWiki::Func::writeDebug( "GnuPlotPlugin showError" ) if $debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin showError" ) if $debug;
     return "Error: $error\n";
 }
 
 sub showPlot{
     my ($web, $topic, $name) = @_;
-    TWiki::Func::writeDebug( "GnuPlotPlugin::showPlot  - showPlot for $web, $topic, $name" ) if $debug;
-    require TWiki::Plugins::GnuPlotPlugin::Plot;
-    my $plot = TWiki::Plugins::GnuPlotPlugin::Plot->new($web, $topic, $name);
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::showPlot  - showPlot for $web, $topic, $name" ) if $debug;
+    require Foswiki::Plugins::GnuPlotPlugin::Plot;
+    my $plot = Foswiki::Plugins::GnuPlotPlugin::Plot->new($web, $topic, $name);
     return $plot->render();
 }
 
 sub editPlotSettings{
     my ($web, $topic, $name) = @_;
-    TWiki::Func::writeDebug( "GnuPlotPlugin::editPlotSettings for $web, $topic, $name" ) if $debug;
-    require TWiki::Plugins::GnuPlotPlugin::PlotSettings;
-    my $settings = TWiki::Plugins::GnuPlotPlugin::PlotSettings->fromFile($web, $topic, $name);
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::editPlotSettings for $web, $topic, $name" ) if $debug;
+    require Foswiki::Plugins::GnuPlotPlugin::PlotSettings;
+    my $settings = Foswiki::Plugins::GnuPlotPlugin::PlotSettings->fromFile($web, $topic, $name);
     return $settings->render();
 }
 
 sub savePlotSettings{
     my ($web, $topic, $name, $text) = @_;
-    TWiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings $web, $topic, $name, $text" ) if $debug;
-    require TWiki::Plugins::GnuPlotPlugin::PlotSettings;
-    TWiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings ----------------------------------------------------" ) if $debug;
-    TWiki::Plugins::GnuPlotPlugin::PlotSettings::writeFile($web, $topic, $name, $text);
-    TWiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings OOOOO----------------------------------------------------" ) if $debug;
-    TWiki::Func::redirectCgiQuery( {}, TWiki::Func::getScriptUrl( $web, $topic, "view" ) . "\#gnuplot$name");
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings $web, $topic, $name, $text" ) if $debug;
+    require Foswiki::Plugins::GnuPlotPlugin::PlotSettings;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings ----------------------------------------------------" ) if $debug;
+    Foswiki::Plugins::GnuPlotPlugin::PlotSettings::writeFile($web, $topic, $name, $text);
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::savePlotSettings OOOOO----------------------------------------------------" ) if $debug;
+    Foswiki::Func::redirectCgiQuery( {}, Foswiki::Func::getScriptUrl( $web, $topic, "view" ) . "\#gnuplot$name");
 }
 
 
@@ -209,7 +209,7 @@ Return the user name, or =guest= if not logged in.
 
 This handler is called very early, immediately after =earlyInitPlugin=.
 
-__Since:__ TWiki::Plugins::VERSION = '1.010'
+__Since:__ Foswiki::Plugins::VERSION = '1.010'
 
 =cut
 
@@ -217,7 +217,7 @@ sub DISABLE_initializeUserHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $loginName, $url, $pathInfo ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::initializeUserHandler( $_[0], $_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::initializeUserHandler( $_[0], $_[1] )" ) if $debug;
 }
 
 =pod
@@ -229,7 +229,7 @@ sub DISABLE_initializeUserHandler {
 
 Called when a new user registers with this TWiki.
 
-__Since:__ TWiki::Plugins::VERSION = '1.010'
+__Since:__ Foswiki::Plugins::VERSION = '1.010'
 
 =cut
 
@@ -237,7 +237,7 @@ sub DISABLE_registrationHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $web, $wikiName, $loginName ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::registrationHandler( $_[0], $_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::registrationHandler( $_[0], $_[1] )" ) if $debug;
 }
 
 =pod
@@ -252,12 +252,12 @@ a topic is being rendered.
 
 Plugins that want to implement their own %TAGS% with non-trivial
 additional syntax should implement this function. Internal TWiki
-tags (and any tags declared using =TWiki::Func::registerTagHandler=)
+tags (and any tags declared using =Foswiki::Func::registerTagHandler=)
 are expanded _before_, and then again _after_, this function is called
 to ensure all %TAGS% are expanded.
 
 For tags with trivial syntax it is far more efficient to use
-=TWiki::Func::registerTagHandler= (see =initPlugin=).
+=Foswiki::Func::registerTagHandler= (see =initPlugin=).
 
 __NOTE:__ when this handler is called, &lt;verbatim> blocks have been
 removed from the text (though all other HTML such as &lt;pre> blocks is
@@ -272,7 +272,7 @@ sub DISABLE_commonTagsHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::commonTagsHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::commonTagsHandler( $_[2].$_[1] )" ) if $debug;
 
     # do custom extension rule, like for example:
     # $_[0] =~ s/%XYZ%/&handleXyz()/ge;
@@ -303,7 +303,7 @@ sub DISABLE_beforeCommonTagsHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::beforeCommonTagsHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::beforeCommonTagsHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -329,7 +329,7 @@ sub DISABLE_afterCommonTagsHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::afterCommonTagsHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::afterCommonTagsHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -368,7 +368,7 @@ __NOTE__: This handler is called once for each rendered block of text i.e. it ma
 __NOTE:__ meta-data is _not_ embedded in the text passed to this
 handler.
 
-Since TWiki::Plugins::VERSION = '1.026'
+Since Foswiki::Plugins::VERSION = '1.026'
 
 =cut
 
@@ -387,7 +387,7 @@ __NOTE__: This handler is called once for each rendered block of text i.e. it ma
 __NOTE:__ meta-data is _not_ embedded in the text passed to this
 handler.
 
-Since TWiki::Plugins::VERSION = '1.026'
+Since Foswiki::Plugins::VERSION = '1.026'
 
 =cut
 
@@ -407,7 +407,7 @@ in the edit box. It is called once when the =edit= script is run.
 
 __NOTE__: meta-data may be embedded in the text passed to this handler (using %META: tags)
 
-__Since:__ TWiki::Plugins::VERSION = '1.010'
+__Since:__ Foswiki::Plugins::VERSION = '1.010'
 
 =cut
 
@@ -415,7 +415,7 @@ sub DISABLE_beforeEditHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::beforeEditHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::beforeEditHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -432,7 +432,7 @@ __NOTE:__ this handler is _not_ called unless the text is previewed.
 __NOTE:__ meta-data is _not_ embedded in the text passed to this
 handler.
 
-__Since:__ TWiki::Plugins::VERSION = '1.010'
+__Since:__ Foswiki::Plugins::VERSION = '1.010'
 
 =cut
 
@@ -440,7 +440,7 @@ sub DISABLE_afterEditHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::afterEditHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::afterEditHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -449,13 +449,13 @@ sub DISABLE_afterEditHandler {
    * =$text= - text _with embedded meta-data tags_
    * =$topic= - the name of the topic in the current CGI query
    * =$web= - the name of the web in the current CGI query
-   * =$meta= - the metadata of the topic being saved, represented by a TWiki::Meta object.
+   * =$meta= - the metadata of the topic being saved, represented by a Foswiki::Meta object.
 
 This handler is called each time a topic is saved.
 
 __NOTE:__ meta-data is embedded in $text (using %META: tags)
 
-__Since:__ TWiki::Plugins::VERSION = '1.010'
+__Since:__ Foswiki::Plugins::VERSION = '1.010'
 
 =cut
 
@@ -463,7 +463,7 @@ sub DISABLE_beforeSaveHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::beforeSaveHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::beforeSaveHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -474,13 +474,13 @@ sub DISABLE_beforeSaveHandler {
    * =$topic= - the name of the topic in the current CGI query
    * =$web= - the name of the web in the current CGI query
    * =$error= - any error string returned by the save.
-   * =$meta= - the metadata of the saved topic, represented by a TWiki::Meta object 
+   * =$meta= - the metadata of the saved topic, represented by a Foswiki::Meta object 
 
 This handler is called each time a topic is saved.
 
 __NOTE:__ meta-data is embedded in $text (using %META: tags)
 
-__Since:__ TWiki::Plugins::VERSION = '1.020'
+__Since:__ Foswiki::Plugins::VERSION = '1.020'
 
 =cut
 
@@ -488,7 +488,7 @@ sub DISABLE_afterSaveHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web, $error, $meta ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::afterSaveHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::afterSaveHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -505,14 +505,14 @@ will include at least the following attributes:
    * =comment= - the comment
    * =user= - the user's Web.<nop>WikiName
 
-__Since:__ TWiki::Plugins::VERSION = '1.023'
+__Since:__ Foswiki::Plugins::VERSION = '1.023'
 
 =cut
 
 sub DISABLE_beforeAttachmentSaveHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ###   my( $attrHashRef, $topic, $web ) = @_;
-    TWiki::Func::writeDebug( "- ${pluginName}::beforeAttachmentSaveHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::beforeAttachmentSaveHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -528,14 +528,14 @@ will include at least the following attributes:
    * =comment= - the comment
    * =user= - the user's Web.<nop>WikiName
 
-__Since:__ TWiki::Plugins::VERSION = '1.023'
+__Since:__ Foswiki::Plugins::VERSION = '1.023'
 
 =cut
 
 sub DISABLE_afterAttachmentSaveHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ###   my( $attrHashRef, $topic, $web ) = @_;
-    TWiki::Func::writeDebug( "- ${pluginName}::afterAttachmentSaveHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::afterAttachmentSaveHandler( $_[2].$_[1] )" ) if $debug;
 }
 
 =pod
@@ -582,16 +582,16 @@ $headers->{expires} = '+1h';
 
 Note that this is the HTTP header which is _not_ the same as the HTML
 &lt;HEAD&gt; tag. The contents of the &lt;HEAD&gt; tag may be manipulated
-using the =TWiki::Func::addToHEAD= method.
+using the =Foswiki::Func::addToHEAD= method.
 
-__Since:__ TWiki::Plugins::VERSION 1.026
+__Since:__ Foswiki::Plugins::VERSION 1.026
 
 =cut
 
 sub DISABLE_modifyHeaderHandler {
     my ( $headers, $query ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::modifyHeaderHandler()" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::modifyHeaderHandler()" ) if $debug;
 }
 
 =pod
@@ -606,7 +606,7 @@ If this handler is defined in more than one plugin, only the handler
 in the earliest plugin in the INSTALLEDPLUGINS list will be called. All
 the others will be ignored.
 
-__Since:__ TWiki::Plugins::VERSION = '1.010'
+__Since:__ Foswiki::Plugins::VERSION = '1.010'
 
 =cut
 
@@ -614,7 +614,7 @@ sub DISABLE_redirectCgiQueryHandler {
     # do not uncomment, use $_[0], $_[1] instead
     ### my ( $query, $url ) = @_;
 
-    TWiki::Func::writeDebug( "- ${pluginName}::redirectCgiQueryHandler( query, $_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( "- ${pluginName}::redirectCgiQueryHandler( query, $_[1] )" ) if $debug;
 }
 
 =pod

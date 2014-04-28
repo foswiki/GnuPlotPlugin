@@ -1,7 +1,7 @@
 
-package TWiki::Plugins::GnuPlotPlugin::Plot;
+package Foswiki::Plugins::GnuPlotPlugin::Plot;
 
-require TWiki::Plugins::GnuPlotPlugin::PlotSettings;
+require Foswiki::Plugins::GnuPlotPlugin::PlotSettings;
 
 use strict;
 use Assert;
@@ -10,13 +10,13 @@ my $debug = 0;
 
 sub new{
     my ($class, $web, $topic, $plotName) = @_;
-    $debug = $TWiki::Plugins::GnuPlotPlugin::debug;
-    TWiki::Func::writeDebug( "GnuPlotPlugin::Plot::new - Creating new Plot with name $plotName" ) if $debug;
+    $debug = $Foswiki::Plugins::GnuPlotPlugin::debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::Plot::new - Creating new Plot with name $plotName" ) if $debug;
     my $self = {};
     $self->{WEB}   = $web;
     $self->{TOPIC} = $topic;
     $self->{NAME}  = $plotName;
-    $self->{PATH}  = TWiki::Func::getPubDir() . "/$web/$topic";
+    $self->{PATH}  = $Foswiki::cfg{PubDir} . "/$web/$topic";
     $self->{GNUFILE} = "$plotName.gnu";
     $self->{PNGFILE} = "$plotName.png";
     $self->{ERRFILE} = "$plotName.err";
@@ -29,7 +29,7 @@ sub new{
 
 sub render{
     my $self = shift;    
-    TWiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - Rendering $self->{NAME}" ) if $debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - Rendering $self->{NAME}" ) if $debug;
 
     my $renderedText = "<a name=\"gnuplot" . $self->{NAME} . "\"></a>\n";
     my $gnuFile = $self->{PATH} . "/" . $self->{GNUFILE};
@@ -44,12 +44,11 @@ sub render{
         my $gnuplotPath = "/usr/bin/gnuplot";
         my $gnuplotHelperPath = "/home/httpd/twiki/tools/gnuplot.pl";
         my $execCmd = "/usr/bin/perl %HELPERSCRIPT|F% %GNUPLOT|F% %WORKDIR|F% %INFILE|F% %OUTFILE|F% %ERRFILE|F% ";
-        TWiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - GnuPlot path: $gnuplotPath" ) if $debug;
-        TWiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - GnuPlot helper path: $gnuplotHelperPath" ) if $debug;
-        TWiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - Executing $execCmd in sandbox" ) if $debug;
-        TWiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - errorfile set to $errFile" ) if $debug;
-        my $sandbox = $TWiki::sharedSandbox; 
-        my ($output, $status) = $sandbox->sysCommand($execCmd,
+        Foswiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - GnuPlot path: $gnuplotPath" ) if $debug;
+        Foswiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - GnuPlot helper path: $gnuplotHelperPath" ) if $debug;
+        Foswiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - Executing $execCmd in sandbox" ) if $debug;
+        Foswiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - errorfile set to $errFile" ) if $debug;
+        my ($output, $status) = Foswiki::Sandbox->sysCommand($execCmd,
                                                      HELPERSCRIPT => $gnuplotHelperPath,
                                                      GNUPLOT => $gnuplotPath,
                                                      WORKDIR => $self->{PATH},
@@ -57,7 +56,7 @@ sub render{
                                                      OUTFILE => $pngFile,
                                                      ERRFILE => $errFile
                                                     );
-        TWiki::Func::writeDebug("gnuplot-sandbox: output $output status $status") if $debug;
+        Foswiki::Func::writeDebug("gnuplot-sandbox: output $output status $status") if $debug;
         if(-s $pngFile)
         {
             $renderedText .= "%ATTACHURL%/$self->{PNGFILE}\n\n";
@@ -85,7 +84,7 @@ sub render{
     }
     else
     {
-        TWiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - $gnuFile does not exist" ) if $debug;
+        Foswiki::Func::writeDebug( "GnuPlotPlugin::Plot::render - $gnuFile does not exist" ) if $debug;
         $renderedText = "No settings found for this plot (<nop>$self->{GNUFILE} not found). Click on the Edit button below to generate and edit the settings for this plot.\n";
         $renderedText .= "\n" . editPlotSettingsButton($self);
     }
@@ -94,7 +93,7 @@ sub render{
 
 sub parseFile {
     my ($self, $gnuFile, $gnuTmpFile) = @_;
-    TWiki::Func::writeDebug( "GnuPlotPlugin::Plot::readFile - Reading settings from $gnuFile" ) if $debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::Plot::readFile - Reading settings from $gnuFile" ) if $debug;
     open (INFILE, $gnuFile) or return newFile();
     open (OUTFILE, ">", $gnuTmpFile) or die;
     my $plotString = "";
@@ -126,10 +125,10 @@ sub parseFile {
 sub editPlotSettingsButton {
     my $self = shift;
     my $text = '';
-    $text .= "<form action='" . TWiki::Func::getScriptUrl( "$self->{WEB}", "$self->{TOPIC}", "view" ) . "#gnuplot".$self->{NAME}."' method=\"post\" >\n";
+    $text .= "<form action='" . Foswiki::Func::getScriptUrl( "$self->{WEB}", "$self->{TOPIC}", "view" ) . "#gnuplot".$self->{NAME}."' method=\"post\" >\n";
     $text .= "<input type=\"hidden\" name=\"gnuPlotName\" value=\"$self->{NAME}\" />\n";
     $text .= "<input type=\"hidden\" name=\"gnuPlotAction\" value=\"edit\" />\n";
-    $text .= "<input type=\"submit\" value=\"Edit Plot Settings\" class=\"twikiSubmit\"></input>\n";
+    $text .= "<input type=\"submit\" value=\"Edit Plot Settings\" class=\"foswikiSubmit\"></input>\n";
     $text .= "</form>\n";
     return $text;
 }

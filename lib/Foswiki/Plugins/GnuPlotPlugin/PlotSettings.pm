@@ -1,7 +1,7 @@
 
-package TWiki::Plugins::GnuPlotPlugin::PlotSettings;
+package Foswiki::Plugins::GnuPlotPlugin::PlotSettings;
 
-require TWiki::Plugins::GnuPlotPlugin;
+require Foswiki::Plugins::GnuPlotPlugin;
 
 use strict;
 use Assert;
@@ -10,8 +10,8 @@ my $debug = 0;
 
 sub fromFile{
     my ($class, $web, $topic, $plotName) = @_;
-    $debug = $TWiki::Plugins::GnuPlotPlugin::debug;
-    TWiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::fromFile - Creating new PlotSettings Object from file for $web / $topic / $plotName" );
+    $debug = $Foswiki::Plugins::GnuPlotPlugin::debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::fromFile - Creating new PlotSettings Object from file for $web / $topic / $plotName" );
     my $self = {};
     $self->{WEB}   = $web;
     $self->{TOPIC} = $topic;
@@ -28,11 +28,11 @@ sub fromFile{
 
 sub buildFileName{
     my ($web, $topic, $plotName) = @_;
-    return TWiki::Func::getPubDir() . "/$web/$topic/$plotName.gnu";
+    return $Foswiki::cfg{PubDir} . "/$web/$topic/$plotName.gnu";
 }
 sub readFile {
     my $gnuFile = $_[0];
-    TWiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::readFile - Reading settings from $gnuFile" ) if $debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::readFile - Reading settings from $gnuFile" ) if $debug;
     open (INFILE, $gnuFile) or return newFile();
     my $content = '';
     my $plotString = "test";
@@ -61,19 +61,19 @@ sub readFile {
 
 sub writeFile{
     my ($web, $topic, $plotName, $text) = @_;
-    my $webDir = TWiki::Func::getPubDir() . "/$web";
+    my $webDir = $Foswiki::cfg{PubDir} . "/$web";
     unless (-e $webDir) { mkdir $webDir };
     unless (-e "$webDir/$topic") { mkdir "$webDir/$topic" };
     my $gnuFile =  "$webDir/$topic/$plotName.gnu";
-    TWiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::writeFile - Writing ---=$text=--- to $gnuFile" );# if $debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::writeFile - Writing ---=$text=--- to $gnuFile" );# if $debug;
     open (OUTFILE, ">", $gnuFile) or die "Cannot create new Gnuplot file!";
-    TWiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::writeFile - Writing ---=$text=--- to $gnuFile" );# if $debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::writeFile - Writing ---=$text=--- to $gnuFile" );# if $debug;
     print OUTFILE "$text";
     close OUTFILE;
 }
 
 sub newFile{
-    TWiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::newFile - Creating new default settings" ) if $debug;
+    Foswiki::Func::writeDebug( "GnuPlotPlugin::PlotSettings::newFile - Creating new default settings" ) if $debug;
     my $text = '';
     $text .= "set datafile separator \",\"\n";
     $text .= "set terminal png\n";
@@ -91,12 +91,12 @@ sub render{
     my $text = '';
     $text .= "*Edit Settings for !$self->{NAME}*\n";
     $text .= "<a name=\"gnuplot" . $self->{NAME} . "\"></a>\n";
-    $text .= "<form action=" . TWiki::Func::getScriptUrl( "$self->{WEB}", "$self->{TOPIC}", "view" ) . "\#gnuplot$self->{NAME}\" method=\"post\">\n";
+    $text .= "<form action=" . Foswiki::Func::getScriptUrl( "$self->{WEB}", "$self->{TOPIC}", "view" ) . "\#gnuplot$self->{NAME}\" method=\"post\">\n";
     $text .= "<table>\n";
     $text .= "  <tr valign=\"middle\">\n";
     $text .= "    <td><textarea  rows=\"10\" cols=\"90\" name=\"gnuPlotSettingsText\" >$self->{TEXT}</textarea>\n";
     $text .= "    </td>\n";
-    $text .= "    <td><input  type=\"submit\" value=\"Save Settings\" class=\"twikiSubmit\" /><br>\n";
+    $text .= "    <td><input  type=\"submit\" value=\"Save Settings\" class=\"foswikiSubmit\" /><br>\n";
     $text .= "        <a target=\"GnuPlotPlugin\" onclick=\"return launchWindow('TWiki','GnuPlotPlugin')\" href=\"/twiki/bin/view/TWiki/GnuPlotPlugin\">GnuPlotPlugin help</a><br>\n";
     $text .= "        <a target=\"GnuPlotHelp\" onclick=\"return launchWindow('TWiki','GnuPlotHelp')\" href=\"/twiki/bin/view/TWiki/GnuPlotHelp\">Gnuplot help</a>\n";
     $text .= "    </td>\n";
