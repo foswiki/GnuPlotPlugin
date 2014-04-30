@@ -3,4 +3,4 @@ set noxtics
 set noytics
 set noborder
 set style data dots
-plot "%ATTACHDIR%/CIAWorldDataBankIIDenmarkData.data" title "" with lines 
+plot "%ATTACHDIR%/CIAWorldDataBankIIDenmark.data" title "" with lines 
