@@ -1,7 +1,6 @@
-set title "CIAWorldDataBankIIDenmark"
+set title "CIA World Data Bank II Denmark"
 set noxtics
 set noytics
 set noborder
-set data style dots
-set terminal png
-plot "CIAWorldDataBankIIDenmarkData.data" title "" with lines 
+set style data dots
+plot "%ATTACHDIR%/CIAWorldDataBankIIDenmarkData.data" title "" with lines 
