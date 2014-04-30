@@ -45,5 +45,9 @@ sub initPlugin {
   return 1;
 }
 
+sub beforeSaveHandler {
+  core->beforeSaveHandler(@_);
+}
+
 
 1;
