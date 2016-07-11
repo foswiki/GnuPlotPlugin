@@ -1,0 +1,9 @@
+*.swp
+igp_*
+GnuPlotPlugin.md5
+GnuPlotPlugin.sha1
+GnuPlotPlugin.tgz
+GnuPlotPlugin.txt
+GnuPlotPlugin.zip
+GnuPlotPlugin_installer
+GnuPlotPlugin_installer.pl

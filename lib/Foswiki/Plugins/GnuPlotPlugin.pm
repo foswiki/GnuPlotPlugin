@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2010-2014 Foswiki Contributors. Foswiki Contributors
+# Copyright (C) 2010-2016 Foswiki Contributors. Foswiki Contributors
 # are listed in the AUTHORS file in the root of this distribution.
 # NOTE: Please extend that file, not this notice.
 #
@@ -20,8 +20,8 @@ package Foswiki::Plugins::GnuPlotPlugin;
 use strict;
 use warnings;
 
-our $VERSION = '2.00';
-our $RELEASE = '2.00';
+our $VERSION = '2.10';
+our $RELEASE = '11 Jul 2016';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
 

@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2010-2014 Foswiki Contributors. Foswiki Contributors
+# Copyright (C) 2010-2016 Foswiki Contributors. Foswiki Contributors
 # are listed in the AUTHORS file in the root of this distribution.
 # NOTE: Please extend that file, not this notice.
 #
@@ -67,6 +67,10 @@ sub handleGnuPlotTag {
   my $data = '';
   my $mode = $params->{mode} || 'attachment';
 
+  my $attachWeb = $web;
+  my $attachTopic = $params->{attachtopic} || $topic;
+  ($attachWeb, $attachTopic) = Foswiki::Func::normalizeWebTopicName($attachWeb, $attachTopic);
+
   if ($mode eq 'section') {
     $data = $this->getDataFromSection($web, $topic, $params);
   } elsif ($mode eq 'attachment') {
@@ -120,7 +124,7 @@ sub handleGnuPlotTag {
 
   $this->writeDebug("doing a refresh") if $refresh;
 
-  if (!$refresh && Foswiki::Func::attachmentExists($web, $topic, $outFile)) {
+  if (!$refresh && Foswiki::Func::attachmentExists($attachWeb, $attachTopic, $outFile)) {
     $this->writeDebug("already found $outFile at $web.$topic ... not generating again");
   } else {
     my $outPath = File::Temp->new(UNLINK => ($this->{debug}?0:1));
@@ -135,7 +139,7 @@ HERE
 
     my $tmpFile = File::Temp->new(SUFFIX => '.gnu', UNLINK => ($this->{debug}? 0 : 1));
     my $tmpFileName = $tmpFile->filename;
-    Foswiki::Func::saveFile($tmpFileName, $data);
+    Foswiki::Func::saveFile($tmpFileName, $data, 1);
 
     $this->writeDebug("tmpFile=".$tmpFileName);
 
@@ -159,8 +163,8 @@ HERE
 
     # attach
     my $wikiName = Foswiki::Func::getWikiName();
-    if (Foswiki::Func::checkAccessPermission("CHANGE", $wikiName, undef, $topic, $web)) {
-      Foswiki::Func::saveAttachment($web, $topic, $outFile, { 
+    if (Foswiki::Func::checkAccessPermission("CHANGE", $wikiName, undef, $attachTopic, $attachWeb)) {
+      Foswiki::Func::saveAttachment($attachWeb, $attachTopic, $outFile, { 
         file => $outPath,
         filesize => $size,
         minor => 1,
@@ -173,7 +177,18 @@ HERE
   }
 
   # TODO: need a differnt template for type=canvas
-  return "<img src='%PUBURLPATH%/$web/$topic/$outFile' class='gnuPlotImage' id='gnuplot$name' alt='$name' width='$width' height='$height' />";
+  my $result = $params->{format} || "<img src='\$url' class='gnuPlotImage' id='gnuplot\$name' alt='\$name' width='\$width' height='\$height' />";
+
+  my $url = '%PUBURLPATH%/$web/$topic/$file';
+  $result =~ s/\$url/$url/g;
+  $result =~ s/\$web/$attachWeb/g;
+  $result =~ s/\$topic/$attachTopic/g;
+  $result =~ s/\$file/$outFile/g;
+  $result =~ s/\$name/$name/g;
+  $result =~ s/\$width/$width/g;
+  $result =~ s/\$height/$height/g;
+
+  return Foswiki::Func::decodeFormatTokens($result);
 }
 
 sub getDataFromAttachment {
