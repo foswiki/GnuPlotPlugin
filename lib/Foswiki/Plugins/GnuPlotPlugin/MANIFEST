@@ -1,6 +1,7 @@
 data/System/GnuPlotPlugin.txt 0644
 lib/Foswiki/Plugins/GnuPlotPlugin/Config.spec 0644
 lib/Foswiki/Plugins/GnuPlotPlugin/Core.pm 0644
+lib/Foswiki/Plugins/GnuPlotPlugin/DEPENDENCIES 0644
 lib/Foswiki/Plugins/GnuPlotPlugin.pm 0644
 pub/System/GnuPlotPlugin/BlueWhale.gnu 0644
 pub/System/GnuPlotPlugin/CIAWorldDataBankIIDenmark.data 0644
